@@ -73,8 +73,7 @@ const onTick = () => {
 
 
       // Modifications for Buy Orders.
-      if (OrderType() === OP_BUY)
-      {
+      if (OrderType() === OP_BUY) {
         EntryPrice = Ask;
         ExitPrice = Bid;
 
@@ -86,7 +85,6 @@ const onTick = () => {
             console.log('BUY to Close by EndOfWeekCloseOut ERROR: ', ErrorDescription(GetLastError()));
           }
         }
-
 
         if (TakeProfitPips > 0 && OrderTakeProfit() === 0) {
           if ((TakeProfit - EntryPrice) > StopsLevel) {
@@ -100,50 +98,173 @@ const onTick = () => {
 
         // This check verifies that the price is within the minimum level (StopsLevel)
         // of tolerance to execute a closing Order.
-        if ((StopLoss - ExitPrice) > StopsLevel) {
-          if (OrderModify(OrderTicker(), OrderOpenPrice(), StopLoss, TakeProfit, 0)) {
-            console.log('SELL Modified by StopLoss COMPLETED.');
-          } else {
-            console.log('SELL Modified by StopLoss ERROR: ', ErrorDescription(GetLastError()));
+        if (StopLoss > 0 && OrderStopLoss() === 0) {
+          StopLoss = OrderOpenPrice() - (StopLossPips * pips);
+
+          if (ExitPrice - StopLoss > StopsLevel) {
+            if (OrderModify(OrderTicket(), OrderOpenPrice(), StopLoss, TakeProfit, 0)) {
+              console.log('BUY Modified by StopLoss COMPLETED');
+            } else {
+              console.log('BUY Modified by StopLoss ERROR: ', ErrorDescription(GetLastError()));
+            }
           }
         }
 
         if (TrailStopATR) {
           ATR = iCustom(null, 0, 'ATR_TRAILSTOP_V4', ATR_BackPeriod, ATR_SecondaryTF, ATR_period, ATR_factor, 0, 0);
-          stoploss = ATR;
+          StopLoss = ATR;
 
           if (StopLoss > 0 &&  (StopLoss - OrderStopLoss() > 0 || OrderStopLoss() === 0)) {
             if (OrderModify(OrderTicker(), OrderOpenPrice(), StopLoss, TakeProfit, 0)) {
-              console.log('BUY OrderModify by TrailStopATR is ok');
+              console.log('BUY Modified by TrailStopATR COMPLETED.');
             } else {
-              console.log('BUY OrderModify by TrailStopATR failed with error: ', ErrorDescription(GetLastError()));
+              console.log('BUY Modified by TrailStopATR ERROR: ', ErrorDescription(GetLastError()));
             }
           }
 
+          if (TrailStopPreviousClose) {
+            StopLoss = Close[1] - (TrailStopSize * pips);
 
-
-          if (TrailStopStandard) {
-            stopLoss = ExitPrice - (TrailStopSize * pips);
-
-            if ((ExitPrice - StopLoss) > StopsLevel && (stopLoss - OrderStopLoss() > 0 || OrderStopLoss() === 0)) {
-              if (OrderModify(OrderTicker(), OrderOpenPrice(), StopLoss, TakeProfit, 0)) {
-                console.log('BUY Order modified by TrailStopStandard');
+            if (ExitPrice - StopLoss > StopsLevel && (StopLoss - OrderStopLoss() > 0) || OrderStopLoss() === 0) {
+              if (OrderModify(OrderTicket(), OrderOpenPrice(), StopLoss, TakeProfit, 0)) {
+                console.log('BUY Modified by TrailStopPreviousClose COMPLETED');
               } else {
-                console.log('BUY attempted to modify Order - ERROR: ', ErrorDescription(GetLastError()));
+                console.log('BUY Modified by TrailStopPreviousClose ERROR: ', ErrorDescription(GetLastError()));
               }
             }
           }
 
-          Orders_counter++;
+          if (TrailStopStandard) {
+            StopLoss = ExitPrice - (TrailStopSize * pips);
+
+            if ((ExitPrice - StopLoss) > StopsLevel && (StopLoss - OrderStopLoss() > 0 || OrderStopLoss() === 0)) {
+              if (OrderModify(OrderTicker(), OrderOpenPrice(), StopLoss, TakeProfit, 0)) {
+                console.log('BUY Modified by TrailStopStandard COMPLETED');
+              } else {
+                console.log('BUY Modified by TrailStopStandared ERROR: ', ErrorDescription(GetLastError()));
+              }
+            }
+          }
+
+          orders_counter++;
         }
 
-
-
       } // if Order with ticket number is a BUY Order.
+
+      if (OrderType() === OP_SELL) {
+        EntryPrice = Bid;
+        ExitPrice = Ask;
+
+        if (EndOfWeekCloseOut && CheckEOWC()) {
+          if (OrderClose(OrderTicket(), OrderLots(), ExitPrice, Slippage, clrRed)) {
+            console.log('SELL Closed by EndOfWeekCloseOut COMPLETED');
+          } else {
+            console.log('SELL Close by EndOfWeekCloseOut ERROR: ', ErrorDescription(GetLastError()));
+          }
+        }
+
+        if (TakeProfitPips > 0 && OrderTakeProfit() === 0) {
+          if (EntryPrice - TakeProfit < StopSLevel) {
+            if (OrderModify(OrderTicket(), OrderOpenPrice(), OrderStopLoss(), TakeProfit, 0)) {
+              console.log('SELL Modified by TakeProfit COMPLETED');
+            } else {
+              console.log('SELL Modified by TakeProfit ERROR: ', ErrorDescription(GetLastError()));
+            }
+          }
+        }
+
+        if (StopLossPips > 0 && OrderStopLoss() === 0) {
+          StopLoss = OrderOpenPrice() + (StopLossPips * pips);
+
+          if ((StopLoss - ExitPrice) > StopsLevel) {
+            if (OrderModify(OrderTicket(), OrderOpenPrice(), StopLoss, TakeProfit, 0)) {
+              console.log('SELL Modified by StopLoss COMPLETED');
+            } else {
+              console.log('SELL Modified by StopLoss ERROR');
+            }
+          }
+        }
+
+        if (TrailStopATR) {
+          ATR = iCustom(NULL, 0, 'ATR_TRAILSTOP_V4', ATR_BackPeriod, ATR_SecondaryTF, ATR_Period, ATR_Factor, 1, 0);
+          StopLoss = ATR;
+
+          if (StopLoss > 0 && (OrderStopLoss() - StopLoss > 0) || OrderStopLoss() === 0) {
+            if (OrderModify(OrderTicket(), OrderOpenPrice(), StopLoss, TakeProfit, 0)) {
+              console.log('SELL Modified by TrailStopATR COMPLETED');
+            } else {
+              console.log('SELL Modification by TrailStopATR ERROR: ', ErrorDescription(GetLastError()));
+            }
+          }
+
+          if (TrailStopPreviousClose) {
+            StopLoss = Close[1] + (TrailStopSize * pips);
+
+            if ((StopLoss - ExitPrice) > StopsLevel && (OrderStopLoss() - StopLoss) > 0 || OrderStopLoss() === 0) {
+              if (OrderModify(OrderTicket(), OrderOpenPrice(), StopLoss, TakeProfit, 0)) {
+                console.log('SELL Modified by TrailStopPreviousClose COMPLETED');
+              } else {
+                console.log('SELL Modification by TrailStopPreviousClose ERROR: ', ErrorDescription(GetLastError()));
+              }
+            }
+          }
+
+          if (TrailStopStandard) {
+            StopLoss = ExitPrice + (TrailStopSize * pips);
+
+            if ((StopLoss - ExitPrice) > StopsLevel && (OrderStopLoss() - StopLoss) > 0 || OrderStopLoss() === 0) {
+              if (OrderModify(OrderTicket(), OrderOpenPrice(), StopLoss, TakeProfit, 0)) {
+                console.log('SELL Modified by TrailStopStandard COMPLETED');
+              } else {
+                console.log('SELL Modified by TrailStopStanddard ERROR: ', ErrorDescription(GetLastError()));
+              }
+            }
+          }
+        }
+
+        orders_counter++
+      }
 
     }  // Orders with ticket number;
 
   } // end of for loop;
+
+  if (CandleTime !== Time[0]) {
+    CandleTime = Time[0];
+
+    if (orders_counter < MaxOpenTrades && !CheckEOWC()) {
+      if (GetSignal() === OP_BUY) {
+        RefreshRates();
+        EntryPrice = Ask;
+        ATR = iCustom(NULL, 0, 'ATR_TRAILSTOP_V4', ATR_BackPeriod, ATR_SecondaryTF, ATR_Period, ATR_Factor, 0, 0);
+        vol = GetVolume();
+        Comment('Volume = ', GetVolume());
+
+        if (EntryPrice > ATR) {
+          if (OrderSend(_Symbol, OP_BUY, vol, EntryPrice, Slippage, 0, 0, '', MagicNumber, 0, clrCyan) > 0) {
+            console.log('BUY order SENT!');
+          } else {
+            console.log('BUY order Send ERROR: ', ErrorDescription(GetLastError()));
+          }
+        }
+      }
+
+      if (GetSignal() === OP_SELL) {
+        EntryPrice = Bid;
+        ATR = iCustom(NULL, 0, 'ATR_TRAILSTOP_V4', ATR_BackPeriod, ATR_SecondaryTF, ATR_Period, ATR_Factor, 0, 0);
+        vol = GetVolume();
+        console.log('Volume = ', GetVolume());
+        if (EntryPrice > ATR) {
+          if (OrderSend(_Symbol, OP_SELL, vol, EntryPrice, Slippage, 0, 0, '', MagicNumber, 0, clrPink) > 0) {
+            console.log('SELL order SENT!');
+          } else {
+            console.log('SELL order send ERROR: ', ErrorDescription(GetLastError()));
+          }
+        }
+      }
+
+    }
+  }
 
 // Check End of the Week Close out schedule.
 

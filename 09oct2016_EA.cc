@@ -335,7 +335,7 @@ void OnTick() {
         {
           RefreshRates();
           EntryPrice = Ask;
-          ATR = ATR  = iCustom(NULL, 0, "ATR_TRAILSTOP_V4", ATR_BackPeriod, ATR_SecondaryTF, ATR_Period, ATR_Factor, 0, 0);
+          ATR = iCustom(NULL, 0, "ATR_TRAILSTOP_V4", ATR_BackPeriod, ATR_SecondaryTF, ATR_Period, ATR_Factor, 0, 0);
           vol = GetVolume();
           Comment("Vol =", GetVolume());
           if(EntryPrice > ATR)
