@@ -121,10 +121,9 @@ int start()
 //|         On Tick Function = "Calculate Every Tick"                |
 //+------------------------------------------------------------------+
 
-void OnTick()
-{
+void OnTick() {
 
-  //|----------Declaring Local Variables for "OnTick()"--------------
+  // -------------------- Declaring Local Variables for "OnTick()" --------------------
 
   double vol;
   double StopLoss = 0;
@@ -136,21 +135,22 @@ void OnTick()
 
   static datetime CandleTime = 0;
 
-  //|----------Iterate over all Open orders---------------------------------
+  // -------------------- Iterate over all Open orders --------------------
 
-  for(int i = totalOrders - 1; i > -1 ; i--)
-  {
-    //|-------Selecting Order's that have already been sent to the server and been given a Ticket number------------
+  for(int i = totalOrders - 1; i > -1 ; i--) {
+    // Filter orders that have a ticket number.
     if(OrderSelect(i, SELECT_BY_POS) && OrderSymbol() == _Symbol && OrderMagicNumber() == MagicNumber && OrderCloseTime() == 0)         //+---Selects any trade that is currently open then initiates a series of MODIFICATIONS to that order per the following group of "if{}" statements
     {
+      // Calculate profit target.
       TakeProfit = OrderOpenPrice() + (TakeProfitPips * pips);
       Comment("Take Profit = ", OrderTakeProfit());
-      RefreshRates();                                                                                                                  //+---This function is used when Expert Advisor has been calculating for a long time and needs data refreshing. Returns true if data are refreshed, otherwise returns false.
+
+      refreshRates();                                                                                                                  //+---This function is used when Expert Advisor has been calculating for a long time and needs data refreshing. Returns true if data are refreshed, otherwise returns false.
 
       stopslevel = MathMax(SymbolInfoInteger(_Symbol, SYMBOL_SPREAD), SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL)) * pips;  //+---Establishes WHERE the Stop should be plotted on the chart.
       Comment("Stops Level = ", stopslevel);
-      //|-----Modifications for BUY orders-------------------------
 
+      // Modifications for BUY orders.
       if(OrderType() == OP_BUY)
       {
         EntryPrice = Ask;
@@ -166,7 +166,6 @@ void OnTick()
 
         if(TakeProfitPips > 0 && OrderTakeProfit() == 0)
         {
-
           if(TakeProfit - EntryPrice > stopslevel)
           {
             if(OrderModify(OrderTicket(), OrderOpenPrice(), OrderStopLoss(), TakeProfit, 0))
@@ -237,8 +236,7 @@ void OnTick()
         orders_counter++;
       }
 
-      //|-----Modifications for SELL orders-------------------------
-
+      // Modifications for SELL orders.
       if(OrderType() == OP_SELL)
       {
         EntryPrice = Bid;
@@ -267,7 +265,7 @@ void OnTick()
         {
           StopLoss = OrderOpenPrice() + (StopLossPips * pips);
 
-          if(StopLoss - ExitPrice > stopslevel)
+          if((StopLoss - ExitPrice) > stopslevel)
           {
             if(OrderModify(OrderTicket(), OrderOpenPrice(), StopLoss, TakeProfit, 0))
             Print("SELL OrderModify by StopLoss is ok");
@@ -324,10 +322,12 @@ void OnTick()
         }
       }
     }
+
+
     if(CandleTime != Time[0])
     {
       CandleTime = Time[0];
-      //----------------SEND TRADE Conditions------------------------------------------
+      // -------------------- SEND TRADE Conditions --------------------
 
       if(orders_counter < MaxOpenTrades && !CheckEOWC())
       {
@@ -365,7 +365,7 @@ void OnTick()
 
     }
   }
-  //+------------------------------------------------------------------+
+  // -------------------- Utility Functions --------------------
   bool CheckEOWC()
   {
     bool result = false;
@@ -377,6 +377,7 @@ void OnTick()
     return(result);
   }
 
+  // Calculate volume based on currency pair fn.
   double GetVolume()
   {
     double result = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
@@ -398,6 +399,8 @@ void OnTick()
 
     return(MathMax(NormalizeDouble(result, LotDigits), SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN)));
   }
+
+  // calculate BUY and SELL signals.
   int GetSignal()
   {
     int result = -1;
@@ -516,22 +519,18 @@ void OnTick()
 
   }
 
-  //------------------END of BUY & SELL Logic Conditions----------------------
+  // -------------------- END of BUY & SELL Logic Conditions--------------------
 
 
-  //double GetATRTrailStop(int cmd)
-  //{
-  //   double result = 0;
-  //
-  //   if(cmd == OP_BUY)
-  //      result = ATR_BUY;
-  //
-  //   if(cmd == OP_SELL)
-  //      result = ATR_SELL;
+  double GetATRTrailStop(int cmd)
+  {
+    double result = 0;
 
-  //----
-  //   return(NormalizeDouble(result, _Digits));
-  //  }
+    if(cmd == OP_BUY) result = ATR_BUY;
+    if(cmd == OP_SELL) result = ATR_SELL;
+
+    return(NormalizeDouble(result, _Digits));
+  }
 
   string ErrorDescription(int err)
   {
