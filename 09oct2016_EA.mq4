@@ -80,7 +80,7 @@ double EntryPrice = 0;
 double ExitPrice  = 0;
 double ATR        = 0;
 
-//input string Password = ""; //Please Enter Your Password
+// input string Password = ""; //Please Enter Your Password
 
 //+------------------------------------------------------------------+
 //|        Initialization                                            |
@@ -122,12 +122,9 @@ int start()
 //+------------------------------------------------------------------+
 
 void OnTick() {
-
-  // -------------------- Declaring Local Variables for "OnTick()" --------------------
-
   double vol;
   double StopLoss = 0;
-  //   double TakeProfit = OrderOpenPrice() + (TakeProfitPips * pips);
+  double TakeProfit = OrderOpenPrice() + (TakeProfitPips * pips);
   double TakeProfit = 0;
   double stopslevel = 0;
   int orders_counter = 0;
@@ -404,9 +401,9 @@ void OnTick() {
   int GetSignal()
   {
     int result = -1;
-    //static datetime SigCandleTime = 0;
-    //  if(SigCandleTime != Time[0])
-    //   {
+    static datetime SigCandleTime = 0;
+     if(SigCandleTime != Time[0])
+      {
     double MACD_Value       = iMACD(_Symbol, _Period, MACD_V1, MACD_V2, MACD_AVG, PRICE_CLOSE, MODE_MAIN, 0);
     double MACD_Average     = iMACD(_Symbol, _Period, MACD_V1, MACD_V2, MACD_AVG, PRICE_CLOSE, MODE_SIGNAL, 0);
 
@@ -496,25 +493,25 @@ void OnTick() {
       result = OP_SELL;
     }
 
-    //   string cmt  =  "macd_value: " + DoubleToString(macd_value, _Digits) + "\n" +
-    //                  "macd_average: " + DoubleToString(macd_average, _Digits) + "\n" +
-    //                  "rsi: " + DoubleToString(rsi, _Digits) + "\n" +
-    //                  "rsi_value: " + DoubleToString(rsi_value, _Digits) + "\n" +
-    //                  "rsi_sma: " + DoubleToString(rsi_sma, _Digits) + "\n" +
-    //                  "rsi_v1: " + DoubleToString(rsi_v1, _Digits) + "\n" +
-    //                  "rsi_v2: " + DoubleToString(rsi_v2, _Digits) + "\n" +
-    //                  "rsi_momo_value: " + DoubleToString(rsi_momo_value, _Digits) + "\n" +
-    //                  "rsi_momo_sma: " + DoubleToString(rsi_momo_sma, _Digits) + "\n" +
-    //                  "ema_med: " + DoubleToString(ema_med, _Digits) + "\n" +
-    //                  "ema_med_1: " + DoubleToString(ema_med_1, _Digits) + "\n" +
-    //                  "ema_med_2: " + DoubleToString(ema_med_2, _Digits) + "\n" +
-    //                  "ema_med_3: " + DoubleToString(ema_med_3, _Digits) + "\n" +
-    //                  "ema_fast: " + DoubleToString(ema_fast, _Digits) + "\n" +
-    //                  "result: " + IntegerToString(result);
-    //
-    //   Comment(cmt);
-    //SigCandleTime = Time[0];
-    //}
+      string cmt  =  "macd_value: " + DoubleToString(macd_value, _Digits) + "\n" +
+                     "macd_average: " + DoubleToString(macd_average, _Digits) + "\n" +
+                     "rsi: " + DoubleToString(rsi, _Digits) + "\n" +
+                     "rsi_value: " + DoubleToString(rsi_value, _Digits) + "\n" +
+                     "rsi_sma: " + DoubleToString(rsi_sma, _Digits) + "\n" +
+                     "rsi_v1: " + DoubleToString(rsi_v1, _Digits) + "\n" +
+                     "rsi_v2: " + DoubleToString(rsi_v2, _Digits) + "\n" +
+                     "rsi_momo_value: " + DoubleToString(rsi_momo_value, _Digits) + "\n" +
+                     "rsi_momo_sma: " + DoubleToString(rsi_momo_sma, _Digits) + "\n" +
+                     "ema_med: " + DoubleToString(ema_med, _Digits) + "\n" +
+                     "ema_med_1: " + DoubleToString(ema_med_1, _Digits) + "\n" +
+                     "ema_med_2: " + DoubleToString(ema_med_2, _Digits) + "\n" +
+                     "ema_med_3: " + DoubleToString(ema_med_3, _Digits) + "\n" +
+                     "ema_fast: " + DoubleToString(ema_fast, _Digits) + "\n" +
+                     "result: " + IntegerToString(result);
+
+      Comment(cmt);
+    SigCandleTime = Time[0];
+    }
     return(result);
 
   }
