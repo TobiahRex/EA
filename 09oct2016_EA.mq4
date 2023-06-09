@@ -125,7 +125,7 @@ void OnTick() {
   double vol;
   double StopLoss = 0;
   double TakeProfit = OrderOpenPrice() + (TakeProfitPips * pips);
-  double TakeProfit = 0;
+  TakeProfit = 0;
   double stopslevel = 0;
   int orders_counter = 0;
   int totalOrders = OrdersTotal();
@@ -142,7 +142,7 @@ void OnTick() {
       TakeProfit = OrderOpenPrice() + (TakeProfitPips * pips);
       Comment("Take Profit = ", OrderTakeProfit());
 
-      refreshRates();                                                                                                                  //+---This function is used when Expert Advisor has been calculating for a long time and needs data refreshing. Returns true if data are refreshed, otherwise returns false.
+      RefreshRates();                                                                                                                  //+---This function is used when Expert Advisor has been calculating for a long time and needs data refreshing. Returns true if data are refreshed, otherwise returns false.
 
       stopslevel = MathMax(SymbolInfoInteger(_Symbol, SYMBOL_SPREAD), SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL)) * pips;  //+---Establishes WHERE the Stop should be plotted on the chart.
       Comment("Stops Level = ", stopslevel);
@@ -493,15 +493,15 @@ void OnTick() {
       result = OP_SELL;
     }
 
-      string cmt  =  "macd_value: " + DoubleToString(macd_value, _Digits) + "\n" +
-                     "macd_average: " + DoubleToString(macd_average, _Digits) + "\n" +
-                     "rsi: " + DoubleToString(rsi, _Digits) + "\n" +
-                     "rsi_value: " + DoubleToString(rsi_value, _Digits) + "\n" +
-                     "rsi_sma: " + DoubleToString(rsi_sma, _Digits) + "\n" +
-                     "rsi_v1: " + DoubleToString(rsi_v1, _Digits) + "\n" +
-                     "rsi_v2: " + DoubleToString(rsi_v2, _Digits) + "\n" +
-                     "rsi_momo_value: " + DoubleToString(rsi_momo_value, _Digits) + "\n" +
-                     "rsi_momo_sma: " + DoubleToString(rsi_momo_sma, _Digits) + "\n" +
+      string cmt  =  "macd_value: " + DoubleToString(MACD_Value, _Digits) + "\n" +
+                     "macd_average: " + DoubleToString(MACD_Average, _Digits) + "\n" +
+                     "rsi: " + DoubleToString(RSI, _Digits) + "\n" +
+                     "rsi_value: " + DoubleToString(RSI_Value, _Digits) + "\n" +
+                     "rsi_sma: " + DoubleToString(RSI_SMA, _Digits) + "\n" +
+                     "rsi_v1: " + DoubleToString(RSI_EMA1, _Digits) + "\n" +
+                     "rsi_v2: " + DoubleToString(RSI_EMA2, _Digits) + "\n" +
+                     "rsi_momo_value: " + DoubleToString(RSI_MOMO_Value, _Digits) + "\n" +
+                     "rsi_momo_sma: " + DoubleToString(RSI_MOMO_MA, _Digits) + "\n" +
                      "ema_med: " + DoubleToString(ema_med, _Digits) + "\n" +
                      "ema_med_1: " + DoubleToString(ema_med_1, _Digits) + "\n" +
                      "ema_med_2: " + DoubleToString(ema_med_2, _Digits) + "\n" +
@@ -517,17 +517,6 @@ void OnTick() {
   }
 
   // -------------------- END of BUY & SELL Logic Conditions--------------------
-
-
-  double GetATRTrailStop(int cmd)
-  {
-    double result = 0;
-
-    if(cmd == OP_BUY) result = ATR_BUY;
-    if(cmd == OP_SELL) result = ATR_SELL;
-
-    return(NormalizeDouble(result, _Digits));
-  }
 
   string ErrorDescription(int err)
   {
